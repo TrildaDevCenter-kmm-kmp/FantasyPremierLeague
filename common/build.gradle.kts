@@ -42,25 +42,23 @@ kotlin {
     sourceSets {
 
         sourceSets["commonMain"].dependencies {
-            // Coroutines
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.kotlinCoroutines}") {
-                isForce = true
+            with(Deps.Ktor) {
+                implementation(clientCore)
+                implementation(clientJson)
+                implementation(clientLogging)
+                implementation(clientSerialization)
+                implementation(contentNegotiation)
+                implementation(json)
             }
 
-            // Ktor
-            implementation(Ktor.clientCore)
-            implementation(Ktor.clientJson)
-            implementation(Ktor.clientLogging)
-            implementation(Ktor.clientSerialization)
-
-            // Kotlinx Serialization
-            implementation(Serialization.core)
+            with(Deps.Kotlinx) {
+                implementation(coroutinesCore)
+                implementation(serializationCore)
+                api(dateTime)
+            }
 
             // Realm
             implementation(Deps.realm)
-
-            // Kotlinx Date/Time
-            api(Deps.kotlinxDateTime)
 
             // koin
             api(Koin.core)
@@ -69,31 +67,32 @@ kotlin {
             // kermit
             api(Deps.kermit)
         }
-        sourceSets["commonTest"].dependencies {
+
+        val androidMain by getting {
+            dependencies {
+                implementation(Deps.Ktor.clientAndroid)
+            }
         }
 
-        sourceSets["androidMain"].dependencies {
-            implementation(Ktor.clientAndroid)
-        }
-        sourceSets["androidTest"].dependencies {
-            implementation(kotlin("test-junit"))
-            implementation(Test.junit)
+        val jvmMain by getting {
+            dependencies {
+                implementation(Deps.Ktor.clientJava)
+                implementation(Deps.Ktor.slf4j)
+
+                implementation("org.nield:kotlin-statistics:1.2.1")
+                implementation("org.ojalgo:okalgo:0.0.2")
+                implementation("org.jetbrains.kotlinx:multik-api:0.1.0")
+                implementation("org.jetbrains.kotlinx:multik-jvm:0.1.0")
+            }
         }
 
-        sourceSets["jvmMain"].dependencies {
-            implementation(Ktor.clientJava)
-            implementation(Ktor.slf4j)
 
-            implementation("org.nield:kotlin-statistics:1.2.1")
-            implementation("org.ojalgo:okalgo:0.0.2")
-            implementation("org.jetbrains.kotlinx:multik-api:0.1.0")
-            implementation("org.jetbrains.kotlinx:multik-jvm:0.1.0")
+        val iOSMain by getting {
+            dependencies {
+                implementation(Deps.Ktor.clientIos)
+            }
         }
-
-        sourceSets["iOSMain"].dependencies {
-            implementation(Ktor.clientIos)
-        }
-        sourceSets["iOSTest"].dependencies {
+        val iOSTest by getting {
         }
     }
 }
