@@ -51,7 +51,7 @@ fun createHttpClient(httpClientEngine: HttpClientEngine, json: Json, enableNetwo
     if (enableNetworkLogs) {
         install(Logging) {
             logger = Logger.DEFAULT
-            level = LogLevel.NONE
+            level = LogLevel.INFO
         }
     }
 }

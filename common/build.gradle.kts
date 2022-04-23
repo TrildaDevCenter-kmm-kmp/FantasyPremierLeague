@@ -2,13 +2,11 @@ plugins {
     kotlin("multiplatform")
     id("kotlinx-serialization")
     id("com.android.library")
-    id("org.jetbrains.kotlin.native.cocoapods")
     id("io.realm.kotlin") version Versions.realm
+    id("org.jetbrains.kotlin.native.cocoapods")
+    id("com.rickclephas.kmp.nativecoroutines")
     id("com.chromaticnoise.multiplatform-swiftpackage") version "2.0.3"
 }
-
-// CocoaPods requires the podspec to have a version.
-version = "1.0"
 
 android {
     compileSdk = AndroidSdk.compile
@@ -19,53 +17,72 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
 }
 
-kotlin {
-    val iosTarget: (String, org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget.() -> Unit) -> org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget = when {
-        System.getenv("SDK_NAME")?.startsWith("iphoneos") == true -> ::iosArm64
-        System.getenv("NATIVE_ARCH")?.startsWith("arm") == true -> ::iosSimulatorArm64 // available to KT 1.5.30
-        else -> ::iosX64
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        freeCompilerArgs = listOf("-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi")
     }
-    iosTarget("iOS") {}
+}
 
 
-    android()
-    jvm()
+// CocoaPods requires the podspec to have a version.
+version = "1.0"
+
+kotlin {
+    targets {
+        val iosTarget: (String, org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget.() -> Unit) -> org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget = when {
+            System.getenv("SDK_NAME")?.startsWith("iphoneos") == true -> ::iosArm64
+            System.getenv("NATIVE_ARCH")?.startsWith("arm") == true -> ::iosSimulatorArm64 // available to KT 1.5.30
+            else -> ::iosX64
+        }
+        iosTarget("iOS") {}
+
+        macosX64("macOS")
+        android()
+        jvm()
+    }
+
 
     cocoapods {
-        summary = "Fantasy Football Premier League"
-        homepage = "Link to a Kotlin/Native module homepage"
-        frameworkName = "FantasyPremierLeagueKit"
+        // Configure fields required by CocoaPods.
+        summary = "FantasyPremierLeague common module"
+        homepage = "homepage placeholder"
     }
 
+
     sourceSets {
+        val commonMain by getting {
+            dependencies {
+                with(Deps.Ktor) {
+                    implementation(clientCore)
+                    implementation(clientJson)
+                    implementation(clientLogging)
+                    implementation(clientSerialization)
+                    implementation(contentNegotiation)
+                    implementation(json)
+                }
 
-        sourceSets["commonMain"].dependencies {
-            with(Deps.Ktor) {
-                implementation(clientCore)
-                implementation(clientJson)
-                implementation(clientLogging)
-                implementation(clientSerialization)
-                implementation(contentNegotiation)
-                implementation(json)
+                with(Deps.Kotlinx) {
+                    implementation(coroutinesCore)
+                    implementation(serializationCore)
+                    implementation(dateTime)
+                }
+
+                // Realm
+                implementation(Deps.realm)
+
+                // koin
+                with(Deps.Koin) {
+                    api(core)
+                    api(test)
+                }
             }
-
-            with(Deps.Kotlinx) {
-                implementation(coroutinesCore)
-                implementation(serializationCore)
-                api(dateTime)
-            }
-
-            // Realm
-            implementation(Deps.realm)
-
-            // koin
-            api(Koin.core)
-            api(Koin.test)
-
-            // kermit
-            api(Deps.kermit)
         }
 
         val androidMain by getting {
@@ -74,19 +91,6 @@ kotlin {
             }
         }
 
-        val jvmMain by getting {
-            dependencies {
-                implementation(Deps.Ktor.clientJava)
-                implementation(Deps.Ktor.slf4j)
-
-                implementation("org.nield:kotlin-statistics:1.2.1")
-                implementation("org.ojalgo:okalgo:0.0.2")
-                implementation("org.jetbrains.kotlinx:multik-api:0.1.0")
-                implementation("org.jetbrains.kotlinx:multik-jvm:0.1.0")
-            }
-        }
-
-
         val iOSMain by getting {
             dependencies {
                 implementation(Deps.Ktor.clientIos)
@@ -94,28 +98,33 @@ kotlin {
         }
         val iOSTest by getting {
         }
+
+        val macOSMain by getting {
+            dependencies {
+                implementation(Deps.Ktor.clientIos)
+            }
+        }
+
+        val jvmMain by getting {
+            dependencies {
+                implementation(Deps.Ktor.clientJava)
+                implementation(Deps.Ktor.slf4j)
+            }
+        }
     }
 }
 
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "1.8"
+kotlin {
+    targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
+        compilations.get("main").kotlinOptions.freeCompilerArgs += "-Xexport-kdoc"
     }
 }
-
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs = listOf("-Xuse-experimental=kotlin.time.ExperimentalTime")
-    }
-}
-
 
 multiplatformSwiftPackage {
+    packageName("BikeShareKit")
     swiftToolsVersion("5.3")
     targetPlatforms {
         iOS { v("13") }
+        macOS{ v("10_15") }
     }
 }
-

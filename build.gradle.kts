@@ -1,14 +1,16 @@
-
 buildscript {
+    val kotlinVersion: String by project
+    println(kotlinVersion)
+
     repositories {
         google()
         mavenCentral()
-        maven(url = "https://oss.jfrog.org/artifactory/oss-snapshot-local")
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:7.0.4")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}")
-        classpath("org.jetbrains.kotlin:kotlin-serialization:${Versions.kotlin}")
+        classpath("com.android.tools.build:gradle:7.1.3")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
+        classpath("org.jetbrains.kotlin:kotlin-serialization:${kotlinVersion}")
+        classpath("com.rickclephas.kmp:kmp-nativecoroutines-gradle-plugin:${Versions.kmpNativeCoroutinesVersion}")
     }
 }
 
@@ -17,7 +19,8 @@ allprojects {
         google()
         mavenCentral()
         maven(url = "https://maven.pkg.jetbrains.space/public/p/ktor/eap")
+        maven(url = "https://maven.pkg.jetbrains.space/public/p/kotlinx-coroutines/maven")
+        maven(url = "https://androidx.dev/snapshots/builds/7909927/artifacts/repository")
     }
 }
-
 

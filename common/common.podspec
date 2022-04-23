@@ -1,19 +1,19 @@
 Pod::Spec.new do |spec|
     spec.name                     = 'common'
     spec.version                  = '1.0'
-    spec.homepage                 = 'Link to a Kotlin/Native module homepage'
+    spec.homepage                 = 'homepage placeholder'
     spec.source                   = { :http=> ''}
     spec.authors                  = ''
     spec.license                  = ''
-    spec.summary                  = 'Fantasy Football Premier League'
-    spec.vendored_frameworks      = 'build/cocoapods/framework/FantasyPremierLeagueKit.framework'
+    spec.summary                  = 'FantasyPremierLeague common module'
+    spec.vendored_frameworks      = 'build/cocoapods/framework/common.framework'
     spec.libraries                = 'c++'
                 
                 
                 
     spec.pod_target_xcconfig = {
         'KOTLIN_PROJECT_PATH' => ':common',
-        'PRODUCT_MODULE_NAME' => 'FantasyPremierLeagueKit',
+        'PRODUCT_MODULE_NAME' => 'common',
     }
                 
     spec.script_phases = [
